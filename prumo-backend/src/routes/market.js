@@ -229,4 +229,18 @@ router.post('/comments/:commentId/reply', requireAuth, requireAdmin, async (req,
   }
 });
 
+/**
+ * DELETE /api/market/comments/:commentId
+ * Só admin. Exclui um comentário de visitante (e a resposta dele, se houver).
+ */
+router.delete('/comments/:commentId', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM market_comments WHERE id = $1', [req.params.commentId]);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao excluir o comentário.' });
+  }
+});
+
 module.exports = router;
