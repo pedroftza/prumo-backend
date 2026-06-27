@@ -5,6 +5,7 @@ const migrate = require('./migrate');
 const authRoutes = require('./routes/auth');
 const journalRoutes = require('./routes/journal');
 const marketRoutes = require('./routes/market');
+const contactRoutes = require('./routes/contact');
 const { requireAuth } = require('./middleware/auth');
 
 const app = express();
@@ -31,6 +32,7 @@ app.get('/api/health', (req, res) => res.json({ ok: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/journal', requireAuth, journalRoutes);
 app.use('/api/market', marketRoutes);
+app.use('/api/contact', contactRoutes);
 
 // captura de erro genérica (ex.: CORS rejeitado) pra nunca devolver HTML de erro
 app.use((err, req, res, next) => {

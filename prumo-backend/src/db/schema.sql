@@ -73,3 +73,20 @@ CREATE TABLE IF NOT EXISTS market_comments (
 
 CREATE INDEX IF NOT EXISTS idx_market_comments_report ON market_comments (report_id);
 
+-- E-mails de quem clicou em "Avisar quando publicar uma nova análise".
+-- Por enquanto só guarda — o envio automático de e-mail é uma etapa futura.
+CREATE TABLE IF NOT EXISTS subscribers (
+  id SERIAL PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- Mensagens enviadas pelo formulário de contato (área Sobre).
+CREATE TABLE IF NOT EXISTS contact_messages (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  message TEXT NOT NULL,
+  is_read BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);

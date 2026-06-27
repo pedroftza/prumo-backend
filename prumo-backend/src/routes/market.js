@@ -243,4 +243,40 @@ router.delete('/comments/:commentId', requireAuth, requireAdmin, async (req, res
   }
 });
 
+/**
+ * POST /api/market/subscribe
+ * Público. Guarda o e-mail de quem clicou em "Avisar quando publicar uma
+ * nova análise". Não envia nada ainda — isso é uma etapa futura.
+ */
+router.post('/subscribe', async (req, res) => {
+  try {
+    const email = req.body && req.body.email ? String(req.body.email).trim().toLowerCase() : '';
+    if (!email.includes('@') || !email.includes('.')) {
+      return res.status(400).json({ error: 'Digite um e-mail válido.' });
+    }
+    await pool.query(
+      'INSERT INTO subscribers (email) VALUES ($1) ON CONFLICT (email) DO NOTHING',
+      [email]
+    );
+    res.status(201).json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao salvar o e-mail.' });
+  }
+});
+
+/**
+ * GET /api/market/subscribers
+ * Só admin. Lista de quem já se inscreveu pra receber avisos.
+ */
+router.get('/subscribers', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT email, created_at FROM subscribers ORDER BY created_at DESC');
+    res.json({ subscribers: result.rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao buscar os inscritos.' });
+  }
+});
+
 module.exports = router;
