@@ -1,0 +1,43 @@
+-- Tabela de usuários (traders e administrador)
+-- Executado automaticamente pelo servidor a cada inicialização (ver src/migrate.js)
+-- "IF NOT EXISTS" garante que não dá erro se a tabela já existir.
+
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  role VARCHAR(20) NOT NULL DEFAULT 'trader' CHECK (role IN ('trader', 'admin')),
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);
+
+-- Sessões do Diário de Trader, uma por dia por usuário.
+-- pdf_stats guarda as ~32 métricas importadas do PDF do BlackArrow (formato livre, por isso JSONB).
+CREATE TABLE IF NOT EXISTS journal_entries (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  entry_date DATE NOT NULL,
+  market VARCHAR(50),
+  total_result NUMERIC(12,2) NOT NULL DEFAULT 0,
+  vp VARCHAR(80),
+  renko_100r VARCHAR(80),
+  renko_50r VARCHAR(80),
+  vwap_note VARCHAR(80),
+  rule3 VARCHAR(80),
+  risk_rule VARCHAR(80),
+  disc_star INTEGER NOT NULL DEFAULT 0,
+  good TEXT,
+  improve TEXT,
+  intent TEXT,
+  emotions JSONB NOT NULL DEFAULT '[]',
+  errors JSONB NOT NULL DEFAULT '[]',
+  pdf_stats JSONB,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  UNIQUE (user_id, entry_date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_journal_entries_user_date ON journal_entries (user_id, entry_date);
+
