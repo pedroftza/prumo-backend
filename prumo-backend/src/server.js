@@ -3,6 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const migrate = require('./migrate');
 const authRoutes = require('./routes/auth');
+const journalRoutes = require('./routes/journal');
+const { requireAuth } = require('./middleware/auth');
 
 const app = express();
 
@@ -26,6 +28,7 @@ app.use(express.json());
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 app.use('/api/auth', authRoutes);
+app.use('/api/journal', requireAuth, journalRoutes);
 
 // captura de erro genérica (ex.: CORS rejeitado) pra nunca devolver HTML de erro
 app.use((err, req, res, next) => {
