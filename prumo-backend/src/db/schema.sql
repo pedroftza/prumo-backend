@@ -41,3 +41,35 @@ CREATE TABLE IF NOT EXISTS journal_entries (
 
 CREATE INDEX IF NOT EXISTS idx_journal_entries_user_date ON journal_entries (user_id, entry_date);
 
+-- Relatórios publicados em "Análise de Mercado". A avaliação fica nas próprias
+-- colunas (eval_*) porque é sempre 1 por relatório — não precisa de tabela própria.
+CREATE TABLE IF NOT EXISTS market_reports (
+  id SERIAL PRIMARY KEY,
+  macro TEXT,
+  tecnica TEXT,
+  resumo TEXT,
+  image TEXT,
+  like_count INTEGER NOT NULL DEFAULT 0,
+  eval_rating INTEGER,
+  eval_text TEXT,
+  eval_time TIMESTAMP,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_market_reports_created_at ON market_reports (created_at DESC);
+
+-- Comentários de visitantes em cada relatório, com espaço pra uma resposta
+-- do Analista (reply_*). Sem login — só nome e texto, por escolha do produto.
+CREATE TABLE IF NOT EXISTS market_comments (
+  id SERIAL PRIMARY KEY,
+  report_id INTEGER NOT NULL REFERENCES market_reports(id) ON DELETE CASCADE,
+  author VARCHAR(255) NOT NULL,
+  text TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  reply_text TEXT,
+  reply_time TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_market_comments_report ON market_comments (report_id);
+

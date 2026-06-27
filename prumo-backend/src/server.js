@@ -4,6 +4,7 @@ const cors = require('cors');
 const migrate = require('./migrate');
 const authRoutes = require('./routes/auth');
 const journalRoutes = require('./routes/journal');
+const marketRoutes = require('./routes/market');
 const { requireAuth } = require('./middleware/auth');
 
 const app = express();
@@ -24,11 +25,12 @@ app.use(cors({
     return callback(new Error('Origem não permitida pelo CORS: ' + origin));
   }
 }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/journal', requireAuth, journalRoutes);
+app.use('/api/market', marketRoutes);
 
 // captura de erro genérica (ex.: CORS rejeitado) pra nunca devolver HTML de erro
 app.use((err, req, res, next) => {
